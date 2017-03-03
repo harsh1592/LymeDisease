@@ -8,32 +8,39 @@ import string
 import nltk
 import logging
 import math
+import time
 import numpy as np
+import matplotlib.pyplot as plt
 from nltk import word_tokenize          
 from nltk.stem.porter import PorterStemmer
 from gensim import corpora, models
 from pprint import pprint  
 from nltk.corpus import stopwords
-import matplotlib.pyplot as plt
+from collections import defaultdict
 #logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 
 filename = sys.argv[1]
-data = filename.split("\\")
+data = filename.split("/")
 newname = data[1].split(".")[0]
 
-columnNumber = int(input('Text column number:'))
-
+#columnNumber = int(input('Text column number:'))
+columnNumber =9
 # Globals
+grid = {}
 stemmer = PorterStemmer()
 stop = set(stopwords.words('english'))
 add_stop = set('br/ I ... -- n\'t \'s'.split())
 postList = []
+#parameter_list=[5, 10, 15, 20, 25, 30,35,40,45, 50,55, 60,65,70,75, 80, 100]
+parameter_list=[5, 10, 20, 30, 40, 50, 60, 70]
+
+#parameter_list=[5, 10]
 
 #parse the file into a list
 def readFile(filename):
-    #f = open(filename, 'rt', encoding='utf8')
-    f = open(filename, 'rt')
+    f = open(filename, 'rt', encoding='utf8')
+    #f = open(filename, 'rt')
     try:
         reader = csv.reader(f)
         for row in reader:
@@ -84,20 +91,50 @@ def __main__():
         corpora.MmCorpus.serialize('generatedFiles/corpora_'+newname+'.mm', corpus)
         print('new corpora stored')
     finally:
-        number_of_words = sum(cnt for document in corpus for _, cnt in document)
-        parameter_list = range(5, 71, 5)
+        cp = random.sample(list(corpus),100000)
+        #cp=corpus
+        # split into 70% training and 20% test sets
+        p = int(len(cp) * .7)
+        cp_train = cp[0:p]
+        cp_test = cp[p:]
+        number_of_words = sum(cnt for document in cp_test for _, cnt in document)
         for parameter_value in parameter_list:
-            __getLDA__(corpus,dictionary,parameter_value,number_of_words)
+            __getLDA__(cp_train,cp_test,dictionary,parameter_value,number_of_words)
         
 #perform LDA
-def __getLDA__(corpus,dictionary,num_topics,number_of_words):
-    print('Running LDA on '+str(num_topics)+' topics, with '+str(10)+' run(s)')    
-    ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=num_topics, id2word = dictionary, passes=2)
-    #printTopics(ldamodel) 
-    perplex = ldamodel.bound(corpus)
-    print('Total Perplexity: '+str(perplex))   
-    per_word_perplex = np.exp2(-perplex / number_of_words)   
-    print('Per Word Perplexity: '+str(per_word_perplex))
-    print('\n')
+def __getLDA__(cp_train,cp_test,dictionary,parameter_value,number_of_words):
+    # print "starting pass for num_topic = %d" % num_topics_value
+    print("starting pass for parameter_value = %.3f" % parameter_value)
+    start_time = time.time()
+
+    #ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=num_topics, id2word = dictionary, passes=2)
+
+    ldamodel = models.LdaMulticore(corpus=cp_train, id2word=dictionary, num_topics=parameter_value,chunksize=3000,
+                                    passes=2,  eta=None, workers=3)
+
+    # show elapsed time for model
+    elapsed = time.time() - start_time
+    print("Elapsed time: %s" % elapsed)
+
+    perplex = ldamodel.bound(cp_test)
+    #print("Perplexity: %s" % perplex)
+    #grid[parameter_value].append(perplex)
+
+    per_word_perplex = np.exp2(-perplex / number_of_words)
+    print("Per-word Perplexity: %s" % per_word_perplex)
+    grid[parameter_value] = per_word_perplex
+    
 
 __main__()
+print(grid)
+with open('dict.csv', 'w') as csv_file:
+    writer = csv.writer(csv_file)
+    for key, value in grid.items():
+       writer.writerow([key, value])
+
+#pyplot.subplot(2,1,1)
+yaxis = []
+for key, value in grid.items():
+    yaxis.append(grid[key])
+plt.plot(parameter_list, yaxis, color='blue', lw=2)
+plt.show()
