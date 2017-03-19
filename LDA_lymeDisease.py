@@ -25,7 +25,7 @@ data = filename.split("/")
 newname = data[1].split(".")[0]
 
 #columnNumber = int(input('Text column number:'))
-columnNumber =9
+columnNumber = 0
 # Globals
 grid = {}
 stemmer = PorterStemmer()
@@ -33,18 +33,16 @@ stop = set(stopwords.words('english'))
 add_stop = set('br/ I ... -- n\'t \'s'.split())
 postList = []
 #parameter_list=[5, 10, 15, 20, 25, 30,35,40,45, 50,55, 60,65,70,75, 80, 100]
-parameter_list=[5, 10, 20, 30, 40, 50, 60, 70]
-
-#parameter_list=[5, 10]
+parameter_list=[5, 10, 20]
 
 #parse the file into a list
 def readFile(filename):
     f = open(filename, 'rt', encoding='utf8')
-    #f = open(filename, 'rt')
     try:
         reader = csv.reader(f)
         for row in reader:
-            postList.append(row[columnNumber])# row[1] for the file postIDAndContent.csv
+            if len(row) > 0:
+                postList.append(row[columnNumber])
     finally:
         print('Reading Complete')
         f.close()
@@ -65,13 +63,19 @@ def tokenize(post):
     return stems
 
 #print out the topics in the model
-def printTopics(ldamodel):
-    topics_brief = ldamodel.show_topics(num_topics=num_topics, num_words=15, log=False, formatted=False)
+def printTopics(ldamodel,parameter_value):
+    topics_brief = ldamodel.show_topics(num_topics=parameter_value, num_words=15, log=False, formatted=False)
     print('Printing Topics...\n\n')
     iter = 0
     for topic in topics_brief:
         print ("%d: %s" % (iter, " ".join([x for x,y in topic[1]])))
         iter += 1
+
+#save text to file
+def writeToFile(texts):
+    thefile = open('generatedFiles/frequentWords.txt', 'w')
+    for text in texts:    
+        thefile.write(" ".join(text)+"\n")
 
 #main
 def __main__():
@@ -84,6 +88,15 @@ def __main__():
         readFile(filename)
         texts = [text.lower() for text in postList]
         texts = [tokenize(text) for text in postList]
+
+        # remove words that appear only once
+        frequency = defaultdict(int)
+        for text in texts:
+            for token in text:
+                frequency[token] += 1
+        texts = [[token for token in text if frequency[token] > 1] for text in texts]        
+        writeToFile(texts)
+
         dictionary = corpora.Dictionary(texts)
         dictionary.save('generatedFiles/corporaDictionary_'+newname+'.dict')
         print('new dictionary saved') 
@@ -107,11 +120,9 @@ def __getLDA__(cp_train,cp_test,dictionary,parameter_value,number_of_words):
     print("starting pass for parameter_value = %.3f" % parameter_value)
     start_time = time.time()
 
-    #ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=num_topics, id2word = dictionary, passes=2)
-
     ldamodel = models.LdaMulticore(corpus=cp_train, id2word=dictionary, num_topics=parameter_value,chunksize=3000,
                                     passes=2,  eta=None, workers=3)
-
+    printTopics(ldamodel,parameter_value)
     # show elapsed time for model
     elapsed = time.time() - start_time
     print("Elapsed time: %s" % elapsed)
@@ -127,7 +138,7 @@ def __getLDA__(cp_train,cp_test,dictionary,parameter_value,number_of_words):
 
 __main__()
 print(grid)
-with open('dict.csv', 'w') as csv_file:
+with open('LDA_perplexity_'+newname+"_.csv", 'w') as csv_file:
     writer = csv.writer(csv_file)
     for key, value in grid.items():
        writer.writerow([key, value])
