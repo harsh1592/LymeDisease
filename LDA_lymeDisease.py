@@ -32,8 +32,7 @@ stemmer = PorterStemmer()
 stop = set(stopwords.words('english'))
 add_stop = set('br/ I ... -- n\'t \'s'.split())
 postList = []
-#parameter_list=[5, 10, 15, 20, 25, 30,35,40,45, 50,55, 60,65,70,75, 80, 100]
-parameter_list=[5, 10, 20]
+parameter_list=[5, 10, 15]
 
 #parse the file into a list
 def readFile(filename):
