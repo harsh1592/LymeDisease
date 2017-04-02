@@ -4,7 +4,8 @@ echo "1) Perform LDA topic modelling"
 echo "2) Perform Time Series Analysis"
 echo "3) Create word cloud"
 echo "4) Install word cloud"
-echo "5) Exit"
+echo "5) Download Data folder"
+echo "6) Exit"
 read case;
 
 case $case in
@@ -35,7 +36,15 @@ case $case in
 		4)
 	echo "Installing word cloud..."
 	conda install -c https://conda.anaconda.org/amueller wordcloud
-	echo "Finished Installing word cloud";;
+	echo "Downloading Data folder..." 
+   	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=0B1LdyitP3FKbMXJHTE9nM0R4SFE' -O data/stopwordsDrive.txt
+   	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=0B1LdyitP3FKbaE8zX2pCSnNnMW8' -O data/community_posts_Processed.csv
+   	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=0B1LdyitP3FKbbHVmZkMwNEpBY2c' -O data/frequentWords.txt
+   	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=0B1LdyitP3FKbMjhRSG1fbXZnZDg' -O data/postsContent.csv
+   	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=0B1LdyitP3FKbRzNfdjFnMHZXR28' -O data/users.json
+   	echo "Finieshed downloading all data";;
 		5)
+    echo "Finished Installing word cloud";;
+		6)
 	exit
 esac 
