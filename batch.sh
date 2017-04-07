@@ -1,16 +1,21 @@
 #!/bin/bash
-echo "What is your preferred programming / scripting language"
 echo "1) Perform LDA topic modelling"
 echo "2) Perform Time Series Analysis"
-echo "3) Create word cloud"
-echo "4) Install word cloud"
-echo "5) Download Data folder"
-echo "6) Exit"
+echo "3) Install word cloud"
+echo "4) Download Data"
+echo "5) Exit"
 read case;
 
 case $case in
 	    1) 
-	echo "Performing LDA...";;
+	echo "Performing LDA..."
+	python2 try_lda.py data/outfile_content.csv 
+
+	echo "Performing word cloud visualization..."
+	wordcloud_cli.py --text data/xaa.csv --imagefile generatedFiles/wordcloud_1st_4yrs.png --stopwords data/stopwords_mod.txt --height 480 --width 720
+	wordcloud_cli.py --text data/xaa.csv --imagefile generatedFiles/wordcloud_2nd_4yrs.png --stopwords data/stopwords_mod.txt --height 480 --width 720
+
+	echo "Word Cloud created in /generated";;
 	    2) 
 	echo "Performing Time Series Analysis..."
 	#convert csv to json
@@ -30,21 +35,18 @@ case $case in
 	python2 multithread_timeSeries.py
 	echo "Finished time series analysis";;
 	    3)
-	echo "Performing word cloud visualization..."
-	wordcloud_cli.py --text data/postsContent.csv --imagefile generatedFiles/wordcloud.png --stopwords data/stopwords_mod.txt
-	echo "Word Cloud created in /generated";;
-		4)
 	echo "Installing word cloud..."
 	conda install -c https://conda.anaconda.org/amueller wordcloud
+	echo "Finished Installing word cloud";;
+		4)
 	echo "Downloading Data folder..." 
-   	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=0B1LdyitP3FKbMXJHTE9nM0R4SFE' -O data/stopwordsDrive.txt
-   	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=0B1LdyitP3FKbaE8zX2pCSnNnMW8' -O data/community_posts_Processed.csv
-   	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=0B1LdyitP3FKbbHVmZkMwNEpBY2c' -O data/frequentWords.txt
-   	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=0B1LdyitP3FKbMjhRSG1fbXZnZDg' -O data/postsContent.csv
-   	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=0B1LdyitP3FKbRzNfdjFnMHZXR28' -O data/users.json
-   	echo "Finieshed downloading all data";;
+	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=0B1LdyitP3FKbMXJHTE9nM0R4SFE' -O data/stopwordsDrive.txt
+	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=0B1LdyitP3FKbaE8zX2pCSnNnMW8' -O data/community_posts_Processed.csv
+	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=0B1LdyitP3FKbMjhRSG1fbXZnZDg' -O data/postsContent.csv
+	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=0B1LdyitP3FKbRzNfdjFnMHZXR28' -O data/users.json
+	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=' -O data/xaa.csv
+	wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=' -O data/xab.csv
+	echo "Finieshed downloading all data";;
 		5)
-    echo "Finished Installing word cloud";;
-		6)
 	exit
 esac 
