@@ -31,18 +31,18 @@ def main():
         count = len(re.findall(r'\w+', post['Content']))
         if post['ReplyNum'] == '0':
             if count >= 6500:
-                post['Content'] = "Too large or spam"
+                post['Content'] = " "
                 threads.append(post)
             else:
-                threads.append(post)
+                threads.append(post
                 # threads_dict[post['ThreadRef']] = set()
         else:
-            if not any(d['_id'] == post['_id'] for d in threads):
-                if count >= 6500:
-                    post['Content'] = "Too large or spam"
-                    posts.append(post)
-                else:
-                    posts.append(post)
+            #if not any(d['_id'] == post['_id'] for d in threads): # this is to remove self edges but commented since we handle it later
+            if count >= 6500:
+                post['Content'] = " " # for debugging replace with ' File size too large or spam 
+                posts.append(post)
+            else:
+                posts.append(post)
 
     # for post in collection.find():
     # 	# count = len(re.findall(r'\w+', post['Content']))

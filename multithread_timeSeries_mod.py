@@ -14,6 +14,8 @@ import ntpath
 import pandas as pd
 import numpy as np
 import matplotlib
+import csv
+import sys
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import liwc.categories
@@ -96,35 +98,86 @@ def drawMe(thisList, fileName, window):
                 "-" + fileName + '-measures.pdf')
 
     plt.clf()
-    # file('LIWC_DATA/LIWC_OUTPUT/%s-graph-%s.html' %
-    #      (window, fileName), 'w').write(df.to_html())
+    file('LIWC_DATA/LIWC_OUTPUT/%s-graph-%s.html' %
+         (window, fileName), 'w').write(df.to_html())
     file('LIWC_DATA/LIWC_OUTPUT/%s-graph-%s.csv' %
          (window, fileName), 'w').write(df.to_csv())
 
 
-def tryMultiThread(filepath, all_d, post_d, comment_d):
-    D = {}
+def tryMultiThread(filepath, que): 
     file = ntpath.basename(filepath)
     if not file.startswith("%s_di" % sys.argv[1]):
         return
     print "Processing %s" % file
     g = nx.read_gexf(filepath)  # HACK for top dir
     (posts, comments) = getLIWC(g)
-    post_d.append(posts)
-    comment_d.append(comments)
-
+    
+    # post_d[filepath] = posts
+    # comment_d[filepath] = comments
     g.remove_edges_from(g.selfloop_edges())
-    all_d.append(get_graph_measures(g))
+    graph =  get_graph_measures(g)
+
+    threadData = {filepath + "_graph":graph,filepath + "_posts":posts,filepath + "_comments":comments}
+    que.put(threadData)
     print 'Done %s' % file
+    return threadData
+
+def log_result(result):
+    for k,v in result.items():
+        data = k.split("/")
+        newname = data[2].replace('.gexf','')
+        file = open('LIWC_DATA/CSV/out_'+newname+'.csv','w')
+        for key,value in v.items():
+            file.write(key+','+str(value)+'\n')
+        file.close()
+        # df = pd.DataFrame.from_dict(v, index=[0])
+        # df.to_csv(k+".csv")
+
+def joinFiles():
+    graphFileList = []
+    postsFileList = []
+    commentFileList = []
+    for filename in os.listdir("LIWC_DATA/CSV/"):
+        if 'posts' in filename: postsFileList.append(filename)
+        elif 'comments' in filename: commentFileList.append(filename)
+        elif 'graph' in filename: graphFileList.append(filename)
+    graphFileList = sorted(graphFileList)
+    postsFileList = sorted(postsFileList)
+    commentFileList = sorted(commentFileList)
+    
+    for file in graphFileList:
+        with open('LIWC_DATA/CSV/'+file) as f:
+            d = {}
+            for line in f:
+                (key, val) = line.split(',')
+                d[key] = float(val)
+            listOfDicts.append(d)
+    for file in postsFileList:
+        with open('LIWC_DATA/CSV/'+file) as f:
+            d = {}
+            for line in f:
+                (key, val) = line.split(',')
+                d[key] = float(val)
+            listOfLIWCDictsPosts.append(d)
+    for file in commentFileList:
+        with open('LIWC_DATA/CSV/'+file) as f:
+            d = {}
+            for line in f:
+                (key, val) = line.split(',')
+                d[key] = float(val)
+            listOfLIWCDictsComments.append(d)   
+
+
 
 if __name__ == '__main__':
     pool = Pool(processes=6)
     # shared dicts
     manager = Manager()
-    post_d = manager.list()
-    comment_d = manager.list()
-    all_d = manager.list()
-
+    # post_d = manager.dict()
+    # comment_d = manager.dict()
+    que = manager.Queue()
+    # all_d = manager.dict()
+    fileList = []
     count = 0
     for filename in os.listdir("LIWC_DATA/utility_graphs/"):
 
@@ -133,6 +186,8 @@ if __name__ == '__main__':
         D = {}
         if not filename.startswith("%s_di" % sys.argv[1]):
             continue
+        fileList.append(filename) 
+
         g = nx.read_gexf('LIWC_DATA/utility_graphs/' +
                          filename)  # HACK for top dir
 
@@ -160,6 +215,8 @@ if __name__ == '__main__':
         g.remove_nodes_from([x for x, y in nx.core_number(g).items() if y == max_core_number])
 
         sorted_by_core_number = sorted(nx.core_number(g).items(), key=operator.itemgetter(1))
+        if filename == '27_digraph_2001-01-01_2001-07-14.gexf':
+            pdb.set_trace()
         max_core_number = sorted_by_core_number[-1][1]
 
         # report on strongly connected components
@@ -191,23 +248,25 @@ if __name__ == '__main__':
     # future = [executor.submit(tryMultiThread, filename) for filename in os.listdir(".")]
     # concurrent.futures.wait(future)
     # print "thread end"
-
-    for filename in os.listdir("LIWC_DATA/utility_graphs/"):
+    fileList = sorted(fileList)
+    for filename in fileList:
         pool.apply_async(
-            tryMultiThread, ('LIWC_DATA/utility_graphs/' + filename, all_d, post_d, comment_d))
+            tryMultiThread, ('LIWC_DATA/utility_graphs/' + filename, que), callback = log_result)
 
     pool.close()
     # wait for all the threads to finish
     pool.join()
+
+    joinFiles()
     # end multiprocess
-    for x in all_d:
-        listOfDicts.append(x)
+    # for key in sorted(all_d):
+    #     listOfDicts.append(all_d[key])
 
-    for x in post_d:
-        listOfLIWCDictsPosts.append(x)
+    # for key in sorted(post_d):
+    #     listOfLIWCDictsPosts.append(post_d[key])
 
-    for x in comment_d:
-        listOfLIWCDictsComments.append(x)
+    # for key in sorted(comment_d):
+    #     listOfLIWCDictsComments.append(comment_d[key])
 
     drawMe(listOfDicts, "graph", sys.argv[1])
     drawMe(listOfLIWCDictsPosts, "LIWC-posts", sys.argv[1])

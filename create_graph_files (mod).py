@@ -209,14 +209,14 @@ def main():
             # g = collapse_un(poster_graph, nu_un, commenter_graph)
             # nx.write_gexf(g, "LIWC_DATA/utility_graphs2/%d_graph_%s_%s.gexf" % (diff.days / 7,
             #                                                                    datetime.datetime.strftime(min_date, "%Y-%m-%d"), datetime.datetime.strftime(max_date, "%Y-%m-%d")))
-            min_date = min_date + datetime.timedelta(weeks=6)
-            max_date = max_date + datetime.timedelta(weeks=6)
+            min_date = min_date + datetime.timedelta(weeks=8)
+            max_date = max_date + datetime.timedelta(weeks=8)
             while lower < len(comments) and comments[lower][0] < min_date:
                 lower += 1
             while upper < len(comments) and comments[upper][0] <= max_date:
                 upper += 1
 
-        diff /= 12
+        diff /= 8
         #diff /= 2
         min_date = comments[0][0]
         max_date = min_date + diff
