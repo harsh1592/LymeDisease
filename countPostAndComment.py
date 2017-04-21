@@ -20,14 +20,20 @@ countDict = []
 
 def getLIWC(g):
     postCount = 0
+    usersPosted = set()
+    usersCommented = set()
     commentCount = 0
-    for x in g:
+    for x in g:       
         if len(g.node[x]['text'])>0: 
             postCount += 1 
     for x, y in g.edges():
+        # pdb.set_trace()        
         if len(g.edge[x][y]['text'])>0:
+            usersPosted.add(int(x))
             commentCount += 1
-    return (postCount, commentCount)
+    print len(usersPosted)
+    # pdb.set_trace()
+    return (postCount, commentCount, len(usersPosted))
 
 
 def getCounts(filepath): 
@@ -36,8 +42,8 @@ def getCounts(filepath):
         return
     print "Processing %s" % file
     g = nx.read_gexf('LIWC_DATA/utility_graphs/'+filepath)  # HACK for top dir
-    (postCount, commentCount) = getLIWC(g)
-    countDict.append({'filename':filepath,'postCount':postCount,'commentCount':commentCount})
+    (postCount, commentCount, usersPosted) = getLIWC(g)
+    countDict.append({'filename':filepath,'postCount':postCount,'commentCount':commentCount, 'usersPosted':usersPosted })
 
 
 def WriteDictToCSV(csv_file,csv_columns,dict_data):
@@ -66,5 +72,5 @@ if __name__ == '__main__':
     for filename in fileList:
         getCounts(filename)
 
-    csv_columns = ['filename','postCount','commentCount']
+    csv_columns = ['filename','postCount','commentCount','usersPosted']
     WriteDictToCSV('LIWC_DATA/counts.csv',csv_columns,countDict)

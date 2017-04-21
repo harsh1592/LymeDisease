@@ -1,9 +1,13 @@
+# python create_utility_files_mod.py year
+#eg, python create_utility_files_mod.py 2006
+
 import matplotlib.pyplot as plt
 import pickle
 import collections
 import pymongo
 import copy
 import sys
+import datetime
 import networkx as nx
 import math
 from sklearn import preprocessing
@@ -17,6 +21,21 @@ from bson.timestamp import Timestamp
 import re
 import pdb
 
+def read_date(date):
+    try:
+        output = datetime.datetime.strptime(date, "%Y/%m/%d %H:%M")
+    except ValueError as e:
+        print("Bad date: %s" % date)
+        temp = list(date)
+        temp.pop(8)
+        temp.insert(9, temp[10])
+        temp.pop(13)
+        temp.pop(11)
+        temp.insert(13, ':')
+        temp.insert(15, '0')
+        dateTemp = ''.join(temp)
+        output = datetime.datetime.strptime(dateTemp, "%Y/%m/%d %H:%M")
+    return output
 
 def main():
 
@@ -27,23 +46,20 @@ def main():
     client = MongoClient('mongodb://localhost:27017/')
     db = client.test
     collection = db.posts
+    year = sys.argv[1]
+    b = datetime.datetime.strptime(year+"-01-01", "%Y-%m-%d")
+    tSet = set()
     for post in collection.find():
         count = len(re.findall(r'\w+', post['Content']))
+        date = read_date(post['PostedOn'])
         if post['ReplyNum'] == '0':
-            if count >= 6500:
-                post['Content'] = " "
+            if date > b:
+                tSet.add(post['ThreadRef'])
                 threads.append(post)
-            else:
-                threads.append(post)
-                # threads_dict[post['ThreadRef']] = set()
         else:
-            #if not any(d['_id'] == post['_id'] for d in threads): # this is to remove self edges but commented since we handle it later
-            if count >= 6500:
-                post['Content'] = " " # for debugging replace with ' File size too large or spam 
-                posts.append(post)
-            else:
-                posts.append(post)
-
+            if (date > b) & (post['ThreadRef'] in tSet):
+                # if any(d['ThreadRef'] == post['ThreadRef'] for d in threads):
+                    posts.append(post)
 
     f = open("LIWC_DATA/threads_list.pkl", "w")
     pickle.dump(threads, f)

@@ -237,18 +237,12 @@ if __name__ == '__main__':
     df = pd.DataFrame(ListOfDicts)
     df = order(df, ['filename', 'max_core_number',  'nontrivial sccs',
                     'NT nontrivial sccs', 'NT max_core_number'])
-    # matplotlib inline
     dp = df.plot()
     dp.legend(loc='upper left', fontsize=7)
 
-    # multithreading to speed the processing time
-
-    # print "thread start"
-    # executor = concurrent.futures.ProcessPoolExecutor(3)
-    # future = [executor.submit(tryMultiThread, filename) for filename in os.listdir(".")]
-    # concurrent.futures.wait(future)
-    # print "thread end"
     fileList = sorted(fileList)
+
+    # run in parallel utilizing the processors
     for filename in fileList:
         pool.apply_async(
             tryMultiThread, ('LIWC_DATA/utility_graphs/' + filename, que), callback = log_result)
@@ -258,15 +252,6 @@ if __name__ == '__main__':
     pool.join()
 
     joinFiles()
-    # end multiprocess
-    # for key in sorted(all_d):
-    #     listOfDicts.append(all_d[key])
-
-    # for key in sorted(post_d):
-    #     listOfLIWCDictsPosts.append(post_d[key])
-
-    # for key in sorted(comment_d):
-    #     listOfLIWCDictsComments.append(comment_d[key])
 
     drawMe(listOfDicts, "graph", sys.argv[1])
     drawMe(listOfLIWCDictsPosts, "LIWC-posts", sys.argv[1])
