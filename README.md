@@ -1,14 +1,17 @@
 LymeDisease
 
-Run the following command, 
+Run the following command in sequence to replicate the project structure, 
 
-batch.sh
+1) Download Data
+	->>>	downloadFiles.sh
 
-choose between the following options.
+2) Perform LDA topic modelling
+	->>>	LDA.sh
 
-1) Perform LDA topic modelling
-2) Perform Time Series Analysis
-3) Install word cloud
-4) Download Data
+3) Perform Time Series Analysis
+	->>>	TimeSeriesAnalysis.sh
 
-Note: You need the data files before starting any analysis.
+4) Geo Mapping user comments and posts
+	->>>	getLocation.sh 
+
+
