@@ -9,7 +9,8 @@ Run the following command in sequence to replicate the project structure,
 	->>>	LDA.sh
 
 3) Perform Time Series Analysis
-	->>>	TimeSeriesAnalysis.sh
+	->>>	TimeSeriesAnalysis.sh year
+	->>>	TimeSeriesAnalysis.sh 2006
 
 4) Geo Mapping user comments and posts
 	->>>	getLocation.sh 
