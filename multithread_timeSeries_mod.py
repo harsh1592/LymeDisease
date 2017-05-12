@@ -170,7 +170,7 @@ if __name__ == '__main__':
     que = manager.Queue()
     fileList = []
     count = 0
-    for filename in os.listdir("LIWC_DATA/utility_graphs4/"):
+    for filename in os.listdir("LIWC_DATA/utility_graphs/"):
 
         count += 1
         print filename, count
@@ -179,7 +179,7 @@ if __name__ == '__main__':
             continue
         fileList.append(filename) 
 
-        g = nx.read_gexf('LIWC_DATA/utility_graphs4/' +
+        g = nx.read_gexf('LIWC_DATA/utility_graphs/' +
                          filename)  # HACK for top dir
 
         # this is where we hadnle selfloop edges
@@ -236,7 +236,7 @@ if __name__ == '__main__':
     # run in parallel utilizing the processors
     for filename in fileList:
         pool.apply_async(
-            tryMultiThread, ('LIWC_DATA/utility_graphs4/' + filename, que), callback = log_result)
+            tryMultiThread, ('LIWC_DATA/utility_graphs/' + filename, que), callback = log_result)
 
     pool.close()
     # wait for all the threads to finish

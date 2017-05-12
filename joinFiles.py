@@ -17,11 +17,11 @@ def drawMe(thisList, fileName, window):
     dp = df.plot(subplots=True, figsize=(6, 25), fontsize=6,
                  yticks=(0.00, 1.00, 2.00, 3.00, 4.00))
 
-    plt.savefig('LIWC_DATA/LIWC_OUTPUT_1/' + window +
+    plt.savefig('LIWC_DATA/LIWC_OUTPUT/' + window +
                 "-" + fileName + '-measures.pdf')
 
     plt.clf()
-    file('LIWC_DATA/LIWC_OUTPUT_1/%s-graph-%s.csv' %
+    file('LIWC_DATA/LIWC_OUTPUT/%s-graph-%s.csv' %
          (window, fileName), 'w').write(df.to_csv())
 
 def joinFiles():

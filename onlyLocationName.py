@@ -49,11 +49,11 @@ def WriteDictToCSV(csv_file,csv_columns,dict_data):
     return 
 
 if __name__ == '__main__':
-    for filename in os.listdir("LIWC_DATA/utility_graphs8/"):
+    for filename in os.listdir("LIWC_DATA/utility_graphs/"):
         if not filename.startswith("%s_di" % sys.argv[1]):
             continue
         print filename
-        g = nx.read_gexf("LIWC_DATA/utility_graphs8/"+filename) 
+        g = nx.read_gexf("LIWC_DATA/utility_graphs/"+filename) 
         file = str(ntpath.basename(filename)).split('.')[0]
         windowyear = file[len(file)-21:len(file)-11]
         getLocation(g,windowyear)
