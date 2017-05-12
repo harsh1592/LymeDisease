@@ -78,7 +78,6 @@ def getLIWCDictForText(text):
     vals = liwc.categories.classify(text)
     for i in range(0, len(vals)):
         d[labels[i]] = 100 * vals[i] / float(vals[40])
-    # d[labels[40]] = float(vals[40])
     return d
 
 
@@ -112,8 +111,6 @@ def tryMultiThread(filepath, que):
     g = nx.read_gexf(filepath)  # HACK for top dir
     (posts, comments) = getLIWC(g)
     
-    # post_d[filepath] = posts
-    # comment_d[filepath] = comments
     g.remove_edges_from(g.selfloop_edges())
     graph =  get_graph_measures(g)
 
@@ -130,8 +127,6 @@ def log_result(result):
         for key,value in v.items():
             file.write(key+','+str(value)+'\n')
         file.close()
-        # df = pd.DataFrame.from_dict(v, index=[0])
-        # df.to_csv(k+".csv")
 
 def joinFiles():
     graphFileList = []
@@ -171,15 +166,11 @@ def joinFiles():
 
 if __name__ == '__main__':
     pool = Pool(processes=6)
-    # shared dicts
     manager = Manager()
-    # post_d = manager.dict()
-    # comment_d = manager.dict()
     que = manager.Queue()
-    # all_d = manager.dict()
     fileList = []
     count = 0
-    for filename in os.listdir("LIWC_DATA/utility_graphs/"):
+    for filename in os.listdir("LIWC_DATA/utility_graphs4/"):
 
         count += 1
         print filename, count
@@ -188,7 +179,7 @@ if __name__ == '__main__':
             continue
         fileList.append(filename) 
 
-        g = nx.read_gexf('LIWC_DATA/utility_graphs/' +
+        g = nx.read_gexf('LIWC_DATA/utility_graphs4/' +
                          filename)  # HACK for top dir
 
         # this is where we hadnle selfloop edges
@@ -245,7 +236,7 @@ if __name__ == '__main__':
     # run in parallel utilizing the processors
     for filename in fileList:
         pool.apply_async(
-            tryMultiThread, ('LIWC_DATA/utility_graphs/' + filename, que), callback = log_result)
+            tryMultiThread, ('LIWC_DATA/utility_graphs4/' + filename, que), callback = log_result)
 
     pool.close()
     # wait for all the threads to finish

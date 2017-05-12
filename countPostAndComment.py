@@ -14,7 +14,8 @@ import csv
 import sys
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-
+import spacy
+nlp = spacy.load('en')
 
 countDict = []
 
@@ -23,11 +24,17 @@ def getLIWC(g):
     usersPosted = set()
     usersCommented = set()
     commentCount = 0
-    for x in g:       
+    for x in g:
+        doc5 = nlp(g.node[x]['text'])
+        for ent in doc5.ents:
+            print ent, ent.label, ent.label_
         if len(g.node[x]['text'])>0: 
             postCount += 1 
     for x, y in g.edges():
-        # pdb.set_trace()        
+        # pdb.set_trace()  
+        doc5 = nlp(g.edge[x][y]['text'])
+        for ent in doc5.ents:
+            print ent, ent.label, ent.label_
         if len(g.edge[x][y]['text'])>0:
             usersPosted.add(int(x))
             commentCount += 1
