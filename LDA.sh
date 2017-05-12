@@ -1,5 +1,5 @@
 #!/bin/bash
-python2 try_lda.py data/outfile_content.csv 
+python2 LDA_lymeDisease.py data/outfile_content.csv 
 
 python2 splitFileByYear.py
 
