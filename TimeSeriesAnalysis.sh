@@ -1,4 +1,6 @@
 #!/bin/bash
+mkdir LIWC_DATA
+
 year = $1
 #convert csv to json
 python2 toJson.py data/community_thread.csv data/community_thread.json
