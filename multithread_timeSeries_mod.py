@@ -165,7 +165,7 @@ def joinFiles():
 
 
 if __name__ == '__main__':
-    pool = Pool(processes=6)
+    pool = Pool(processes=4)
     manager = Manager()
     que = manager.Queue()
     fileList = []
