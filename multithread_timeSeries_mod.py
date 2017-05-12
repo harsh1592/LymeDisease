@@ -206,8 +206,7 @@ if __name__ == '__main__':
         g.remove_nodes_from([x for x, y in nx.core_number(g).items() if y == max_core_number])
 
         sorted_by_core_number = sorted(nx.core_number(g).items(), key=operator.itemgetter(1))
-        if filename == '27_digraph_2001-01-01_2001-07-14.gexf':
-            pdb.set_trace()
+        
         max_core_number = sorted_by_core_number[-1][1]
 
         # report on strongly connected components

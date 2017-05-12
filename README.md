@@ -13,10 +13,12 @@ Run the following command in sequence to replicate the project structure,
    the graphing program simultaneously 
 
 	eg.	TimeSeriesAnalysis.sh year windowNumber
-	->>>	TimeSeriesAnalysis.sh 2006 13
+	->>>	TimeSeriesAnalysis.sh 2007 13
 
 4) Geo Mapping user comments and posts
 	->>>	getLocation.sh 
 
 5) Graphing time series analysis resutls simultaneously, try running this file on obtaining a sufficient amount of results from the step 3
-	->>>	
+
+	eg	joinFiles.py windowNumber
+	->>>	joinFiles.py 13
