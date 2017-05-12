@@ -96,9 +96,9 @@ def __main__():
     print "inside main"
     try:
         corpus = gensim.corpora.MmCorpus(
-            'generatedFiles/corpora_' + newname + '.mm')
+            'generatedFiles/' + newname + '.mm')
         dictionary = gensim.corpora.Dictionary.load(
-            'generatedFiles/corporaDictionary_' + newname + '.dict')
+            'generatedFiles/' + newname + '.dict')
         print 'Found corpus and dictionary for the input file'
     except IOError:
         print "Corpora or dictionary for the input file not found, creating one..."
@@ -117,12 +117,12 @@ def __main__():
         writeToFile(texts)
 
         dictionary = corpora.Dictionary(texts)
-        dictionary.save('generatedFiles/corporaDictionary_' +
+        dictionary.save('generatedFiles/' +
                         newname + '.dict')
         print('new dictionary saved')
         corpus = [dictionary.doc2bow(text) for text in texts]
         corpora.MmCorpus.serialize(
-            'generatedFiles/corpora_' + newname + '.mm', corpus)
+            'generatedFiles/' + newname + '.mm', corpus)
         print('new corpora stored')
     finally:
         cp = random.sample(list(corpus), 100000)
